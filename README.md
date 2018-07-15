@@ -10,3 +10,7 @@ se pueden añadir desde una tarjeta de memoria microsd o desde un pendrive.
 Fuente:
 
 https://www.dfrobot.com/wiki/index.php/DFPlayer_Mini_SKU:DFR0299
+
+https://github.com/darkomen/Arduino/blob/master/Arduino/libraries/NECIRrcv/NECIRrcv.h
+
+https://www.arduino.cc/en/Tutorial.StringToIntExample

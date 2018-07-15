@@ -12,6 +12,9 @@ DFPlayer - A Mini MP3 Player For Arduino
  See <http://www.gnu.org/licenses/> for details.
  All above must be included in any redistribution
  ****************************************************/
+/* NECIRrcv library created by:
+
+https://github.com/darkomen/Arduino/blob/master/Arduino/libraries/NECIRrcv/NECIRrcv.h*/
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
 #include <Arduino.h>

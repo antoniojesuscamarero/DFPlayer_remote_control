@@ -6,3 +6,7 @@ el protocolo de comunicación NEC.
 
 El dispositivo DFPlayer es un reproductor mp3 de bajo coste, donde las pistas de audio
 se pueden añadir desde una tarjeta de memoria microsd o desde un pendrive. 
+
+Fuente:
+
+https://www.dfrobot.com/wiki/index.php/DFPlayer_Mini_SKU:DFR0299

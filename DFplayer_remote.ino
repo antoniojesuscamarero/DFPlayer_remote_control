@@ -1,20 +1,3 @@
-/***************************************************
-DFPlayer - A Mini MP3 Player For Arduino
- <https://www.dfrobot.com/index.php?route=product/product&product_id=1121>
- 
- ***************************************************
- This example shows the basic function of library for DFPlayer.
- 
- Created 2016-12-07
- By [Angelo qiao](Angelo.qiao@dfrobot.com)
- 
- GNU Lesser General Public License.
- See <http://www.gnu.org/licenses/> for details.
- All above must be included in any redistribution
- ****************************************************/
-/* NECIRrcv library created by:
-
-https://github.com/darkomen/Arduino/blob/master/Arduino/libraries/NECIRrcv/NECIRrcv.h*/
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
 #include <Arduino.h>
@@ -28,15 +11,20 @@ SoftwareSerial mySoftwareSerial(10, 11); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 
 unsigned long ircode ;
+//Almacena el codigo de cada uno de los botones desde el 0 al 9
 unsigned long posicion[10]={3994156545,4161273345,4194696705,4177985025,4094426625, 4127849985, 4111138305,4027579905,4061003265,4044291585};
 bool pausa=false;
 bool start=false;
 bool vol=false;
-String val="0";
-unsigned int vez=0;
+String val="0";//Numero cancion
+String val2="0";//Numero carpeta
+
 bool fin=false;
 unsigned int num=1;
 int pos=0;
+int pos2=0;
+int valvol=20;//Valor inicial del volumen
+unsigned int cont=1;
 void setup() {
   //Serial.begin(115200);
   ir.begin() ;
@@ -50,7 +38,7 @@ void setup() {
   while(true);
   //Serial.println("Modulo funcionando");
   }
-  myDFPlayer.volume(20);  //Set volume value. From 0 to 30
+  myDFPlayer.volume(valvol);  //Set volume value. From 0 to 30. Inicialmente esta en 20.
   
 }
 
@@ -70,23 +58,25 @@ void loop() {
     ircode=ir.read();
     //Serial.println(ircode);
 
-    if(ircode== 4144561665){
+    if(ircode== 4144561665){//CH+
       myDFPlayer.next(); //Play next mp3
       //Serial.println("siguente");
       delay(50);
     }
-    if(ircode== 4010868225){
+    if(ircode== 4010868225){//CH-
        myDFPlayer.previous(); //Play previous mp3
        //Serial.println("Previo");
        delay(50);
     }
-    if(ircode== 4278255105){
-      myDFPlayer.volumeUp(); //Volume Up
+    if(ircode== 4278255105){//VOL+
+      valvol=valvol+5;
+      myDFPlayer.volume(valvol); //Volume Up
       //Serial.println("Mas volumen");
       delay(50);
     }
-    if(ircode== 3810328065){
-      myDFPlayer.volumeDown(); //Volume Down   
+    if(ircode== 3810328065){//VOL-
+      valvol=valvol-5;
+      myDFPlayer.volume(valvol); //Volume Down   
       //Serial.println("Menos volumen");
       delay(50);
     }
@@ -124,14 +114,81 @@ void loop() {
         break;
       }
       if (vol==true){
-        myDFPlayer.volume(10); 
+        myDFPlayer.volume(valvol); 
         vol=false; 
         break;    
       }
       delay(50);
     }
-    if (ircode== 3827039745){
-      //Serial.println("Introducir un numero");
+    if (ircode== 3827039745){//Boton text, seleccion cancion
+      cancion();
+    }
+    if (ircode== 3944021505){//Boton EPG, seleccion carpeta 
+      carpeta();
+    }
+  }
+  if (ircode== 3893886465){//Boton audio, cambio ecualizacion
+    ecualizador();
+  }
+  delay(50);
+}
+
+void ecualizador(){
+  //Serial.println("Introducir un numero");
+      fin=false;
+      while(fin==false){
+        ircode=ir.read();
+        for(int i=0; i<6;i++){
+         if (ircode== posicion[i]){
+            //Serial.print("Numero pulsado: "); Serial.println(i);
+            cont=i; break;
+           }              
+        }
+        if (ircode== 4211408385){//Boton EXIT
+            fin=true;
+            switch (cont){
+              case 1: myDFPlayer.EQ(DFPLAYER_EQ_NORMAL); 
+              break;
+              case 2: myDFPlayer.EQ(DFPLAYER_EQ_POP);
+              break;
+              case 3: myDFPlayer.EQ(DFPLAYER_EQ_ROCK);
+              break;
+              case 4: myDFPlayer.EQ(DFPLAYER_EQ_JAZZ);
+              break;
+              case 5: myDFPlayer.EQ(DFPLAYER_EQ_CLASSIC);
+              break;
+              case 6: myDFPlayer.EQ(DFPLAYER_EQ_BASS);
+              break;
+            }  
+          }
+      }
+}
+
+void carpeta(){
+   //Serial.println("Introducir un numero");
+      fin=false;
+      while(fin==false){
+        ircode=ir.read();
+        for(int i=0; i<10;i++){
+         if (ircode== posicion[i]){
+            //Serial.print("Numero pulsado: "); Serial.println(i);
+            val2+=String(i);   
+            break;         
+           }              
+        }
+        if (ircode== 4077714945){//Boton OK
+            fin=true;
+            //Serial.println("fin introducir numeros");
+            //Serial.println(val);
+            pos2=val2.toInt();            
+            myDFPlayer.playFolder(pos2, 1);  //play specific mp3 in SD:/15/004.mp3; Folder Name(1~99); File Name(1~255)
+            val2="0";
+          }
+      }
+}
+
+void cancion(){
+   //Serial.println("Introducir un numero");
       fin=false;
       while(fin==false){
         ircode=ir.read();
@@ -139,18 +196,16 @@ void loop() {
          if (ircode== posicion[i]){
             //Serial.print("Numero pulsado: "); Serial.println(i);
             val+=String(i);
+            break;
            }              
         }
-        if (ircode== 4077714945){
+        if (ircode== 4077714945){//Boton OK
             fin=true;
             //Serial.println("fin introducir numeros");
             //Serial.println(val);
             pos=val.toInt();
-            myDFPlayer.play(pos);
-            vez=0; val="0";
+            myDFPlayer.playFolder(pos2,pos);
+            val="0";
           }
       }
-  }
-  }
-  delay(50);
-}
+} 
